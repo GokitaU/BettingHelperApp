@@ -195,7 +195,7 @@ namespace BettingHelper
             window.SetBetssonOddsLabelText(Constants.WRITING_ODDS_TO_EXCEL_MSG);
             try
             {
-                writer.WriteGames(evts);
+                writer.WriteOdds(evts);
                 writer.Close();
                 window.SetBetssonOddsLabelText(Constants.LOAD_COMPLETE_MSG);
                 return true;

@@ -72,7 +72,7 @@ namespace BettingHelper
                 var betssonEvt = betsson[i];
                 var validationWarning = ValidateGame(svsEvt, betssonEvt);
                 if(validationWarning != null){
-                    warningMsg += $"Match nr {i}: {validationWarning}\n";
+                    warningMsg += $"Match nr {i + 1}: {validationWarning}\n";
                 }
             }
             return String.IsNullOrEmpty(warningMsg) ? null : prefixMsg + warningMsg;
