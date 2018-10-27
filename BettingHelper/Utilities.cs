@@ -32,12 +32,12 @@ namespace BettingHelper
                 );
         }
 
-        public static bool ValidNrOfGames(List<BetssonEvent> betsson)
+        public static bool ValidNrOfGames(List<IBettingEvent> betsson)
         {
             return betsson.Count == 0 || betsson.Count == 13;
         }
 
-        public static string ValidateGame(SvenskaSpelEvent svs, BetssonEvent betsson)
+        public static string ValidateGame(SvenskaSpelEvent svs, IBettingEvent betsson)
         {
             string firstHome = GetFirstLettersInTeamName(svs.HomeTeam);
             string secondHome = GetFirstLettersInTeamName(betsson.HomeTeam);
@@ -53,22 +53,17 @@ namespace BettingHelper
             return team.Length < 5 ? team : team.Replace(" ", "").Substring(0, 5);
         }
 
-        public static string ValidateTeamNames(Dictionary<string, SvenskaSpelDraw> svs, List<BetssonEvent> betsson)
+        public static string ValidateTeamNames(SvenskaSpelDraw svs, List<IBettingEvent> betsson)
         {
             string warningMsg = "";
             string prefixMsg = "Lagnamnen för nedantstående matcher skiljer sig åt! \n\n";
-            SvenskaSpelDraw europa = null;
-            SvenskaSpelDraw stryktips = null;
-            svs.TryGetValue("Europatipset", out europa);
-            svs.TryGetValue("Stryktipset", out stryktips);
-            var svsDraw = ClosestDraw(stryktips,europa);
-            if(svsDraw.DrawEvents.Count != betsson.Count)
+            if(svs.DrawEvents.Count != betsson.Count)
             {
                 return null;
             }
-            for(int i = 0; i < svsDraw.DrawEvents.Count; i++)
+            for(int i = 0; i < svs.DrawEvents.Count; i++)
             {
-                var svsEvt = svsDraw.DrawEvents[i];
+                var svsEvt = svs.DrawEvents[i];
                 var betssonEvt = betsson[i];
                 var validationWarning = ValidateGame(svsEvt, betssonEvt);
                 if(validationWarning != null){
@@ -78,15 +73,9 @@ namespace BettingHelper
             return String.IsNullOrEmpty(warningMsg) ? null : prefixMsg + warningMsg;
         }
 
-        public static string ValidateNrOfGames(Dictionary<string, SvenskaSpelDraw> svs, List<BetssonEvent> betsson)
+        public static string ValidateNrOfGames(SvenskaSpelDraw svs, List<IBettingEvent> betsson)
         {
-            SvenskaSpelDraw stryk = null;
-            SvenskaSpelDraw europa = null;
-            svs.TryGetValue("Europatipset", out europa);
-            svs.TryGetValue("Stryktipset", out stryk);
-            SvenskaSpelDraw closestDraw = ClosestDraw(stryk,europa);
-            string svsWarning = ValidateNrOfSvsGames(closestDraw);
-            
+            string svsWarning = ValidateNrOfSvsGames(svs);            
             string betssonWarning = ValidateNrOfBetssonGames(betsson);
             if(svsWarning != null && betssonWarning != null)
             {
@@ -105,7 +94,7 @@ namespace BettingHelper
             return string.IsNullOrEmpty(warning) ? null : warning.Substring(0, warning.Length-1);
         }
 
-        private static string ValidateNrOfBetssonGames(List<BetssonEvent> betsson)
+        private static string ValidateNrOfBetssonGames(List<IBettingEvent> betsson)
         {
             return ValidNrOfGames(betsson) ? null : $"Antalet matcher som har hämtats för Betsson är {betsson.Count} stycken.";
         }

@@ -30,13 +30,13 @@ namespace BettingHelper
             client.Timeout = TimeSpan.FromSeconds(10);
         }
 
-        public async Task<List<BetssonEvent>> DownloadBetssonOdds()
+        public async Task<List<IBettingEvent>> DownloadBetssonOdds()
         {
             var ids = await DownloadBetssonCardIds();
             BetssonCardInformation latestCard = ids.LatestCard;
             if(latestCard == null)
             {
-                return new List<BetssonEvent>();
+                return new List<IBettingEvent>();
             }
             return await DownloadBetssonCardData(latestCard.Id);
         }
@@ -50,7 +50,7 @@ namespace BettingHelper
                 return deserialized;
         }
 
-        private async Task<List<BetssonEvent>> DownloadBetssonCardData(string cardId)
+        private async Task<List<IBettingEvent>> DownloadBetssonCardData(string cardId)
         {
             try
             {
@@ -59,7 +59,7 @@ namespace BettingHelper
                 string result = await msg.Content.ReadAsStringAsync();
                 JObject json = JObject.Parse(result);
                 IList<JToken> jsonList = json["GetCardDetailsCmsResult"]["Card"]["Events"].Children().ToList();
-                List<BetssonEvent> events = new List<BetssonEvent>();
+                List<IBettingEvent> events = new List<IBettingEvent>();
                 foreach (var token in jsonList)
                 {
                     BetssonEvent evt = token.ToObject<BetssonEvent>();
