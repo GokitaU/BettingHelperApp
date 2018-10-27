@@ -20,6 +20,7 @@ namespace BettingHelper
             this.backgroundWorker = new BackgroundWorker();
             backgroundWorker.DoWork += new DoWorkEventHandler(RunExcelWork);
             backgroundWorker.RunWorkerCompleted += new RunWorkerCompletedEventHandler(WorkComplete);
+           
         }
 
         public async void LoadButtonClicked(BettingHelperWindow window)
@@ -149,10 +150,11 @@ namespace BettingHelper
         {
             Dictionary<ExcelWriteResult,bool> result = (Dictionary<ExcelWriteResult, bool>)arg.Result;
 
-            //window.SetSVSOddsLabelText(writeSuccess ? Constants.LOAD_COMPLETE_MSG : Constants.EXCEL_WRITE_ODDS_ERROR_MSG);
-            //window.ToggleLoadButton(true);
-            //string warningNrOfGames = Utilities.ValidateNrOfGames(svsData,betssonData);
-            //string warningTeamNames = Utilities.ValidateTeamNames(svsData,betssonData);
+            window.SetSVSOddsLabelText(result[ExcelWriteResult.SVS_ODDS] ? Constants.LOAD_COMPLETE_MSG : Constants.EXCEL_WRITE_ODDS_ERROR_MSG);
+            window.SetStryktipsetDistributionLabelText(result[ExcelWriteResult.SVS_DISTRIBUTION] ? Constants.LOAD_COMPLETE_MSG : Constants.EXCEL_WRITE_DISTRIBUTION_ERROR_MSG);
+            window.SetTeamsLoadLabelText(result[ExcelWriteResult.TEAMS] ? Constants.LOAD_COMPLETE_MSG : Constants.EXCEL_WRITE_TEAMS_ERROR_MSG);
+            window.SetBetssonOddsLabelText(result[ExcelWriteResult.BETSSON_ODDS] ? Constants.LOAD_COMPLETE_MSG : Constants.EXCEL_WRITE_ODDS_ERROR_MSG);
+            window.SetTopptipsetDistributionLabelText(result[ExcelWriteResult.TOPPTIPS_DISTRIBUTION] ? Constants.LOAD_COMPLETE_MSG : Constants.EXCEL_WRITE_DISTRIBUTION_ERROR_MSG);
             //if(warningNrOfGames != null)
             //{
             //    window.ShowWarningMessage(Constants.WARNING_TITLE, warningNrOfGames);
