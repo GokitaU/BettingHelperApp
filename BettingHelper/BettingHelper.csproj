@@ -66,6 +66,7 @@
     <Compile Include="BettingHelperWindow.Designer.cs">
       <DependentUpon>BettingHelperWindow.cs</DependentUpon>
     </Compile>
+    <Compile Include="ExcelWriteResult.cs" />
     <Compile Include="SvenskaspelProduct.cs" />
     <Compile Include="ExcelWriter.cs" />
     <Compile Include="Constants.cs" />

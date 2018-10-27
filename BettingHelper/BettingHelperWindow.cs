@@ -41,7 +41,7 @@ namespace BettingHelper
 
         private void BettingHelperWindow_FormClosing(object sender, FormClosingEventArgs e)
         {
-            _controller.WindowIsClosing();
+            //_controller.WindowIsClosing();
         }
 
         public void SetBetssonOddsLabelText(string txt)

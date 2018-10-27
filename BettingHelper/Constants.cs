@@ -22,5 +22,6 @@ namespace BettingHelper
         public const string NO_ODDS_ERROR_MSG = "Det fanns ingen oddsinformation att hämta.";
         public const string WARNING_TITLE = "Varning!";
         public const string WARNING_CONTENT_PRE_TEXT = "Möjligt fel har påträffats. Kontrollera nedanstående: \n";
+        
     }
 }
