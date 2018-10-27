@@ -47,11 +47,13 @@ namespace BettingHelper
             catch (OperationCanceledException exc)
             {
                 writer.Close();
+                window.ToggleLoadButton(true);
                 window.ShowErrorMessage(window, "Timeout", "Kunde inte hämta data från spelbolag.");
             }
             catch (Exception ex)
             {
                 writer.Close();
+                window.ToggleLoadButton(true);
                 window.ShowErrorMessage(window, "Fel!", "Ett oväntat fel har inträffat!");
             }
         }
@@ -136,16 +138,9 @@ namespace BettingHelper
                 return false;
             }
             window.SetSVSOddsLabelText(Constants.WRITING_ODDS_TO_EXCEL_MSG);
-            if (!writer.WriteOdds(draw.DrawEvents))
-            {
-                window.SetSVSOddsLabelText(Constants.EXCEL_WRITE_ODDS_ERROR_MSG);
-                return false;
-            }
-            else
-            {
-                window.SetSVSOddsLabelText(Constants.LOAD_COMPLETE_MSG);
-            }
-            return true;
+            bool writeSuccess = writer.WriteOdds(draw.DrawEvents);
+            window.SetSVSOddsLabelText(writeSuccess ? Constants.LOAD_COMPLETE_MSG : Constants.EXCEL_WRITE_ODDS_ERROR_MSG);
+            return writeSuccess;
         }
 
         private bool ProcessTeams(SvenskaSpelDraw draw)
@@ -195,10 +190,10 @@ namespace BettingHelper
             window.SetBetssonOddsLabelText(Constants.WRITING_ODDS_TO_EXCEL_MSG);
             try
             {
-                writer.WriteOdds(evts);
+                bool writeResult = writer.WriteOdds(evts);
                 writer.Close();
-                window.SetBetssonOddsLabelText(Constants.LOAD_COMPLETE_MSG);
-                return true;
+                window.SetBetssonOddsLabelText(writeResult ? Constants.LOAD_COMPLETE_MSG : Constants.EXCEL_WRITE_ODDS_ERROR_MSG);
+                return writeResult;
             }
             catch (COMException)
             {

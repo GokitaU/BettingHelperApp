@@ -67,7 +67,6 @@
       <DependentUpon>BettingHelperWindow.cs</DependentUpon>
     </Compile>
     <Compile Include="SvenskaspelProduct.cs" />
-    <Compile Include="EventValidationHelper.cs" />
     <Compile Include="ExcelWriter.cs" />
     <Compile Include="Constants.cs" />
     <Compile Include="IBettingEvent.cs" />

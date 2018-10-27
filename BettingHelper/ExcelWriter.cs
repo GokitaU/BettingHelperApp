@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Threading.Tasks;
 using Microsoft.Office.Interop.Excel;
 
 namespace BettingHelper
@@ -119,33 +120,34 @@ namespace BettingHelper
 
         public bool WriteOdds<T>(List<T> events) where T:IBettingEvent
         {
-            if (events == null || (events.Count != 13 && events.Count != 8))
-            {
-                return false;
-            }
-            Workbook wb = _excel?.Workbooks.Open(filePath);
-            Worksheet sheet = wb.Worksheets[ODDS_GAMES_WORKSHEET];
-            try
-            {
-                for (int i = 0; i < events.Count; i++)
+           
+                if (events == null || (events.Count != 13 && events.Count != 8))
                 {
-                    sheet.Cells[i + ROW_OFFSET, events[i].HomeOddsCol] = events[i].HomeOdds;
-                    sheet.Cells[i + ROW_OFFSET, events[i].DrawOddsCol] = events[i].DrawOdds;
-                    sheet.Cells[i + ROW_OFFSET, events[i].AwayOddsCol] = events[i].AwayOdds;
+                    return false;
                 }
-                wb.Save();
-                return true;
-            }
-            catch (Exception)
-            {
-                return false;
-            }
-            finally
-            {
-                wb.Close(0);
-                System.Runtime.InteropServices.Marshal.ReleaseComObject(wb);
-                System.Runtime.InteropServices.Marshal.ReleaseComObject(sheet);
-            }
+                Workbook wb = _excel?.Workbooks.Open(filePath);
+                Worksheet sheet = wb.Worksheets[ODDS_GAMES_WORKSHEET];
+                try
+                {
+                    for (int i = 0; i < events.Count; i++)
+                    {
+                        sheet.Cells[i + ROW_OFFSET, events[i].HomeOddsCol] = events[i].HomeOdds;
+                        sheet.Cells[i + ROW_OFFSET, events[i].DrawOddsCol] = events[i].DrawOdds;
+                        sheet.Cells[i + ROW_OFFSET, events[i].AwayOddsCol] = events[i].AwayOdds;
+                    }
+                    wb.Save();
+                    return true;
+                }
+                catch (Exception)
+                {
+                    return false;
+                }
+                finally
+                {
+                    wb.Close(0);
+                    System.Runtime.InteropServices.Marshal.ReleaseComObject(wb);
+                    System.Runtime.InteropServices.Marshal.ReleaseComObject(sheet);
+                }
         } 
     }
 }
