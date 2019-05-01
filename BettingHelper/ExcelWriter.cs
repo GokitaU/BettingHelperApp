@@ -83,10 +83,14 @@ namespace BettingHelper
 
         public bool WriteDistribution(SvenskaSpelDraw draw)
         {
-            return WriteDistribution(draw.DrawEvents, draw.ProductName == "Topptipset" ? TOPPTIPSET_DISTRIBUTION_WORKSHEET : STRYKTIPSET_EUROPATIPSET_DISTRIBUTION_WORKSHEET);
+            if(draw == null)
+            {
+                return false;
+            }
+            return WriteDistribution(draw.BettingEvents, draw.ProductName == "Topptipset" ? TOPPTIPSET_DISTRIBUTION_WORKSHEET : STRYKTIPSET_EUROPATIPSET_DISTRIBUTION_WORKSHEET);
         }
 
-        private bool WriteDistribution(List<SvenskaSpelEvent> events, string worksheet)
+        private bool WriteDistribution(List<IBettingEvent> events, string worksheet)
         {
             if (events == null || (events.Count != 13 && events.Count != 8))
             {

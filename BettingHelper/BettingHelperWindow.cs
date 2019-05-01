@@ -1,13 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.IO;
-using System.Linq;
-using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace BettingHelper
@@ -26,7 +17,6 @@ namespace BettingHelper
             MaximizeBox = false;
             openFileDialog.Filter = "Excel-filer|*.xls;*.xlsx;*.xlsm";
             loadDataBtn.Enabled = false;
-
         }
 
         private void openFile_Click(object sender, EventArgs e)
@@ -34,7 +24,7 @@ namespace BettingHelper
             Controller.OpenFileClicked(this);
         }
 
-        private async void loadData_Click(object sender, EventArgs e)
+        private void loadData_Click(object sender, EventArgs e)
         {
             Controller.LoadButtonClicked(this);
         }
@@ -44,10 +34,6 @@ namespace BettingHelper
             //_controller.WindowIsClosing();
         }
 
-        public void SetBetssonOddsLabelText(string txt)
-        {
-            statusLblOddsBetsson.Text = txt;
-        }
 
         public void SetSVSOddsLabelText(string txt)
         {
@@ -108,7 +94,6 @@ namespace BettingHelper
             SetStryktipsetDistributionLabelText(txt);
             SetTeamsLoadLabelText(txt);
             SetSVSOddsLabelText(txt);
-            SetBetssonOddsLabelText(txt);
             SetTopptipsetDistributionLabelText(txt);
         }
 
@@ -120,6 +105,11 @@ namespace BettingHelper
         public void ShowErrorMessage(Form window, string title, string msg)
         {
             MessageBox.Show(window, msg, title, MessageBoxButtons.OK, MessageBoxIcon.Error);
+        }
+
+        private void tableLayoutPanel_Paint(object sender, PaintEventArgs e)
+        {
+
         }
     }
 }

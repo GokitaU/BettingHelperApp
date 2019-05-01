@@ -13,9 +13,9 @@ namespace BettingHelper
         public string AwayTeam => Match["participants"][1]["name"].ToString();
         public JObject Odds;
         public JObject SvenskaFolket;
-        public decimal HomeOdds => Odds == null ? 0 : decimal.Parse(Odds["one"].ToString());
-        public decimal DrawOdds => Odds == null ? 0 : decimal.Parse(Odds["x"].ToString());
-        public decimal AwayOdds => Odds == null ? 0 : decimal.Parse(Odds["two"].ToString());
+        public decimal HomeOdds => Odds == null ? -1 : decimal.Parse(Odds["one"].ToString());
+        public decimal DrawOdds => Odds == null ? -1 : decimal.Parse(Odds["x"].ToString());
+        public decimal AwayOdds => Odds == null ? -1 : decimal.Parse(Odds["two"].ToString());
         public JObject Match;
         public decimal HomeDistribution => SvenskaFolket == null ? 0 : decimal.Parse(SvenskaFolket["one"].ToString()) / 100;
         public decimal DrawDistribution => SvenskaFolket == null ? 0 : decimal.Parse(SvenskaFolket["x"].ToString()) / 100;

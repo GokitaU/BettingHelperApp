@@ -13,6 +13,9 @@ namespace BettingHelper
         decimal HomeOdds { get; }
         decimal DrawOdds { get; }
         decimal AwayOdds { get; }
+        decimal HomeDistribution { get; }
+        decimal DrawDistribution { get; }
+        decimal AwayDistribution { get; }
         int HomeOddsCol { get; }
         int DrawOddsCol { get; }
         int AwayOddsCol { get; }

@@ -15,12 +15,11 @@ namespace BettingHelper
         BackgroundWorker backgroundWorker;
         SvenskaSpelDraw stryktipsetEuropatipset;
         SvenskaSpelDraw topptipset;
-        List<IBettingEvent> betsson;
 
         public BettingHelperController(BettingHelperWindow window)
         {
             this.window = window ?? throw new ArgumentException("Window must not be null.");
-            this.backgroundWorker = new BackgroundWorker();
+            backgroundWorker = new BackgroundWorker();
             backgroundWorker.DoWork += new DoWorkEventHandler(RunExcelWork);
             backgroundWorker.RunWorkerCompleted += new RunWorkerCompletedEventHandler(WorkComplete);
 
@@ -31,14 +30,11 @@ namespace BettingHelper
             window.SetTextForAllStatusLabels("Hämtar data...");
             window.ToggleLoadButton(false);
 
-            var betssonTask = dataLoader?.DownloadBetssonOdds();
             var svsTask = dataLoader?.DownloadSvenskaSpelData();
             try
             {
-                await Task.WhenAll(betssonTask, svsTask);
                 Dictionary<string, SvenskaSpelDraw> svsData = await svsTask;
-                List<IBettingEvent> betssonData = await betssonTask;
-                ProcessData(svsData, betssonData);
+                ProcessData(svsData);
             }
             catch (OperationCanceledException exc)
             {
@@ -52,7 +48,7 @@ namespace BettingHelper
             }
         }
 
-        public void ProcessData(Dictionary<string, SvenskaSpelDraw> svsData, List<IBettingEvent> betsson)
+        public void ProcessData(Dictionary<string, SvenskaSpelDraw> svsData)
         {
             if (!EnsureSVSData(svsData))
             {
@@ -64,16 +60,20 @@ namespace BettingHelper
             svsData.TryGetValue("Europatipset", out europaTipset);
             svsData.TryGetValue("Stryktipset", out strykTipset);
             svsData.TryGetValue("Topptipset", out toppTipset);
+            if(europaTipset == null && strykTipset == null)
+            {
+                window.ShowErrorMessage(window, "Error","No Stryktipset or Europatipset present");
+                window.ToggleLoadButton(true);
+                return;
+            }
             SvenskaSpelDraw stryktipsEuropatips = Utilities.ClosestDraw(europaTipset, strykTipset);
             this.stryktipsetEuropatipset = stryktipsEuropatips;
-            this.betsson = betsson;
             this.topptipset = toppTipset;
             window.SetTeamsLoadLabelText(Constants.WRITING_TEAMS_TO_EXCEL_MSG);
             window.SetSVSOddsLabelText(Constants.WRITING_ODDS_TO_EXCEL_MSG);
-            window.SetBetssonOddsLabelText(Constants.WRITING_ODDS_TO_EXCEL_MSG);
             window.SetStryktipsetDistributionLabelText(Constants.WRITING_DISTRIBUTION_TO_EXCEL_MSG);
             window.SetTopptipsetDistributionLabelText(Constants.WRITING_DISTRIBUTION_TO_EXCEL_MSG);
-            backgroundWorker.RunWorkerAsync(argument: new Tuple<SvenskaSpelDraw, SvenskaSpelDraw, List<IBettingEvent>, string>(stryktipsEuropatips, toppTipset, betsson, _excelPath));
+            backgroundWorker.RunWorkerAsync(argument: new Tuple<SvenskaSpelDraw, SvenskaSpelDraw, string>(stryktipsEuropatips, toppTipset, _excelPath));
         }
 
         private bool EnsureSVSData(Dictionary<string, SvenskaSpelDraw> svsData)
@@ -81,13 +81,11 @@ namespace BettingHelper
             if (svsData == null)
             {
                 window.SetSVSOddsLabelText(Constants.ODDS_DOWNLOAD_ERROR_MSG);
-                window.SetBetssonOddsLabelText("Laddning avbruten eftersom det inte gick att hämta data från Svenska Spel.");
                 return false;
             }
             if (svsData.Count == 0)
             {
                 window.SetSVSOddsLabelText("Det fanns inga data att hämta från Svenska spel!");
-                window.SetBetssonOddsLabelText("Laddning avbruten eftersom det inte gick att hämta data från Svenska Spel.");
                 return false;
             }
             return true;
@@ -119,8 +117,8 @@ namespace BettingHelper
 
         private void RunExcelWork(object sender, DoWorkEventArgs a)
         {
-            Tuple<SvenskaSpelDraw, SvenskaSpelDraw, List<IBettingEvent>, string> data = (Tuple<SvenskaSpelDraw, SvenskaSpelDraw, List<IBettingEvent>, string>)a.Argument;
-            ExcelWriter writer = new ExcelWriter(data.Item4);
+            Tuple<SvenskaSpelDraw, SvenskaSpelDraw, string> data = (Tuple<SvenskaSpelDraw, SvenskaSpelDraw, string>)a.Argument;
+            ExcelWriter writer = new ExcelWriter(data.Item3);
             BackgroundWorker worker = (BackgroundWorker)sender;
             try
             {
@@ -130,56 +128,38 @@ namespace BettingHelper
             {
                 writer.Close();
             }
-            bool writeSvsOdds = writer.WriteOdds(data.Item1.DrawEvents);
+            bool writeSvsOdds = writer.WriteOdds(data.Item1.BettingEvents);
             bool writeSvsDistribution = writer.WriteDistribution(data.Item1);
             bool writeTopptipsDistribution = writer.WriteDistribution(data.Item2);
-            bool writeBetssonOdds = writer.WriteOdds(data.Item3);
-            bool teams = writer.WriteGames(data.Item1.DrawEvents);
+            bool teams = writer.WriteGames(data.Item1.BettingEvents);
             a.Result = new Dictionary<ExcelWriteResult, bool>
-                {
-                    { ExcelWriteResult.SVS_ODDS, writeSvsOdds},
-                    { ExcelWriteResult.SVS_DISTRIBUTION, writeSvsDistribution },
-                    { ExcelWriteResult.TOPPTIPS_DISTRIBUTION,writeTopptipsDistribution },
-                    { ExcelWriteResult.BETSSON_ODDS, writeBetssonOdds },
-                    { ExcelWriteResult.TEAMS, teams }
-                };
+            {
+                { ExcelWriteResult.SVS_ODDS, writeSvsOdds},
+                { ExcelWriteResult.SVS_DISTRIBUTION, writeSvsDistribution },
+                { ExcelWriteResult.TOPPTIPS_DISTRIBUTION,writeTopptipsDistribution },
+                { ExcelWriteResult.TEAMS, teams }
+            };
         }
 
         private void WorkComplete(object sender, RunWorkerCompletedEventArgs arg)
         {
-            Dictionary<ExcelWriteResult, bool> result = (Dictionary<ExcelWriteResult, bool>)arg.Result;
+            Dictionary<ExcelWriteResult, bool> result = (Dictionary<ExcelWriteResult, bool>) arg.Result;
 
             window.SetSVSOddsLabelText(result[ExcelWriteResult.SVS_ODDS] ? Constants.LOAD_COMPLETE_MSG : Constants.EXCEL_WRITE_ODDS_ERROR_MSG);
             window.SetStryktipsetDistributionLabelText(result[ExcelWriteResult.SVS_DISTRIBUTION] ? Constants.LOAD_COMPLETE_MSG : Constants.EXCEL_WRITE_DISTRIBUTION_ERROR_MSG);
             window.SetTeamsLoadLabelText(result[ExcelWriteResult.TEAMS] ? Constants.LOAD_COMPLETE_MSG : Constants.EXCEL_WRITE_TEAMS_ERROR_MSG);
-            window.SetBetssonOddsLabelText(result[ExcelWriteResult.BETSSON_ODDS] ? Constants.LOAD_COMPLETE_MSG : Constants.EXCEL_WRITE_ODDS_ERROR_MSG);
             window.SetTopptipsetDistributionLabelText(result[ExcelWriteResult.TOPPTIPS_DISTRIBUTION] ? Constants.LOAD_COMPLETE_MSG : Constants.EXCEL_WRITE_DISTRIBUTION_ERROR_MSG);
-            string warningNrOfGames = Utilities.ValidateNrOfGames(stryktipsetEuropatipset, betsson);
-            string warningTeamNames = Utilities.ValidateTeamNames(stryktipsetEuropatipset, betsson);
+            string warningNrOfGames = Utilities.ValidateNrOfGames(stryktipsetEuropatipset);
+            string warningTeamNamesTopptipset = Utilities.ValidateTeamNames(stryktipsetEuropatipset,topptipset);
             if (warningNrOfGames != null)
             {
                 window.ShowWarningMessage(Constants.WARNING_TITLE, warningNrOfGames);
             }
-            if (warningTeamNames != null)
+            if (warningTeamNamesTopptipset != null)
             {
-                window.ShowWarningMessage(Constants.WARNING_TITLE, warningTeamNames);
+                window.ShowWarningMessage(Constants.WARNING_TITLE, warningTeamNamesTopptipset);
             }
             window.ToggleLoadButton(true);
-        }
-
-        private bool ValidateBetssonData(List<BetssonEvent> betssonData)
-        {
-            if (betssonData == null)
-            {
-                window.SetBetssonOddsLabelText(Constants.ODDS_DOWNLOAD_ERROR_MSG);
-                return false;
-            }
-            if (betssonData.Count == 0)
-            {
-                window.SetBetssonOddsLabelText(Constants.NO_ODDS_ERROR_MSG);
-                return false;
-            }
-            return true;
         }
 
     }

@@ -56,9 +56,6 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="BettingHelperController.cs" />
-    <Compile Include="BetssonCardInformation.cs" />
-    <Compile Include="BetssonCardInfoCollection.cs" />
-    <Compile Include="BetssonEvent.cs" />
     <Compile Include="BettingDataLoader.cs" />
     <Compile Include="BettingHelperWindow.cs">
       <SubType>Form</SubType>

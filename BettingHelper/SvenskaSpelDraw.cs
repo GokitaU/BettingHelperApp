@@ -10,7 +10,7 @@ namespace BettingHelper
     {
         public DateTime RegCloseTime;
         public List<SvenskaSpelEvent> DrawEvents;
+        public List<IBettingEvent> BettingEvents => DrawEvents?.Cast<IBettingEvent>().ToList();
         public string ProductName;
-        public bool HasOdds => !DrawEvents.Any(evt => evt.Odds == null); 
     }
 }
